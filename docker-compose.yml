@@ -1,0 +1,55 @@
+services:
+  # 1. Aplikasi Laravel (PHP 8.2 + Web Server Internal untuk Development)
+  app:
+    image: lorisleiva/laravel-docker:8.2
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=ruangjujur_db
+      - DB_USERNAME=ruangjujur_user
+      - DB_PASSWORD=ruangjujur_pass
+      - REDIS_HOST=redis
+    working_dir: /var/www/html
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - ruangjujur-network
+
+  # 2. Database MySQL
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=ruangjujur_db
+      - MYSQL_USER=ruangjujur_user
+      - MYSQL_PASSWORD=ruangjujur_pass
+      - MYSQL_ROOT_PASSWORD=root_pass
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - ruangjujur-network
+
+  # 3. Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ruangjujur-network
+
+networks:
+  ruangjujur-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
